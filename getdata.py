@@ -15,8 +15,10 @@ def get_data():
     uum_1d_new_test = uum_1d[[2], :200].astype(np.float32)
     trunk_out = np.load('data_gen/data_motai_3d_mix.npy')[[0, 1, 3, 4, 5, 6, 8, 9]].reshape((8, 200, -1))
     trunk_out_test = np.load('data_gen/data_motai_3d_mix.npy')[[2, 7]].reshape((2, 200, -1))
-    motai = trunk_out.transpose(0, 2, 1)
-    motai_test = trunk_out_test.transpose(0, 2, 1)
+    trunk_out_v=np.load('data_gen/data_motai_3d_mix_v.npy')[[0, 1, 3, 4, 5, 6, 8, 9]].reshape((8, 200, -1))
+    trunk_out_v_test=np.load('data_gen/data_motai_3d_mix_v.npy')[[2, 7]].reshape((2, 200, -1))
+    motai = (trunk_out.transpose(0, 2, 1), trunk_out_v.transpose(0, 2, 1))
+    motai_test = (trunk_out_test.transpose(0, 2, 1), trunk_out_v_test.transpose(0, 2, 1))
     branch_in = np.concatenate((trunk_out.real[..., np.newaxis], trunk_out.imag[..., np.newaxis]), axis=-1).astype(np.float32).reshape((8, 200, -1))
     branch_in_test = np.concatenate((trunk_out_test.real[..., np.newaxis], trunk_out_test.imag[..., np.newaxis]), axis=-1).astype(np.float32).reshape((2, 200, -1))
     
