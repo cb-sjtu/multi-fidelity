@@ -10,3 +10,7 @@ data_gen/
 
 # 忽略 wandb日志文件
 wandb/
+
+# 忽略 Python 编译生成的文件
+*.pyc
+__pycache__/
