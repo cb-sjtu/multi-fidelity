@@ -7,7 +7,6 @@ from network import network
 from postprocess import save_results
 from config import CONFIG  # 导入配置文件
 import os
-
 # 尝试从系统继承代理设置
 
 import wandb  # 导入wandb库
@@ -47,7 +46,7 @@ def main():
     N_points = 87 * 24
     data = dde.data.Sixthple(trunk_out_input, uum, trunk_out_input_test, uum_test)
     # 获取 batch 数据和 indices
-    batch_train_x, batch_train_y, batch_indices = data.train_next_batch(config.batch_size)
+    #batch_train_x, batch_train_y, batch_indices = data.train_next_batch(config.batch_size)
     m = 100 * 87 * 87 * 24 * 2
     activation = ["relu", "relu", "relu"]
     initializer = config.initializer
@@ -59,10 +58,10 @@ def main():
         trunk_net_1,
         trunk_net_2,
         dot,
-        batch_indices,
         {"branch1": activation[0], "branch2": activation[1], "trunk": activation[2]},
         kernel_initializer=initializer,
         regularization=None,
+        data=data,
         
     )
 
