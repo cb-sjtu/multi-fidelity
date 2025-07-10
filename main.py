@@ -1,7 +1,7 @@
 import numpy as np
 import deepxde as dde
 from sklearn.preprocessing import StandardScaler
-from deepxde.nn.tensorflow_compat_v1.mionet import DeepONet_resolvent_3d
+from deepxde.nn.tensorflow_compat_v1.mionet import DeepONet_resolvent_3d_mix
 from getdata import get_data
 from network import network
 from postprocess import save_results
@@ -19,7 +19,10 @@ def main():
     config = wandb.config
 
     dataframe = "DeepONet_resolvent_3d"
-    uum, uum_test, trunk_out, trunk_out_test, dcPs_s, dcPs_s_test, dkxs_s, dkxs_s_test, lambda_z, lambda_z_test, yy, yy_test, real_2d, kzs,motai, motai_test, coodinates, coodinates_test = get_data()
+    uum, uum_test, trunk_out, trunk_out_test, dcPs_s, dcPs_s_test,\
+    dkxs_s, dkxs_s_test, lambda_z, lambda_z_test, yy, yy_test, \
+    real_2d, kzs,motai, motai_test, coodinates, coodinates_test,\
+    uum_1d, uum_1d_test = get_data()
     kzs_test=kzs[[2]].reshape((-1,87,1))
     kzs=kzs[[0,1,3,4]].reshape((-1,87,1))
     
@@ -27,8 +30,10 @@ def main():
     lambda_z_test = np.reshape(lambda_z_test, (-1, 1)).astype(np.float32)
     # coodinates = np.reshape(coodinates, (-1, 3)).astype(np.float32)
     # coodinates_test = np.reshape(coodinates_test, (-1, 3)).astype(np.float32)
-    uum = np.reshape(uum, (-1, 100, 87)).transpose(0, 2, 1).reshape((-1, 100 * 87))
-    uum_test = np.reshape(uum_test, (-1, 100, 87)).transpose(0, 2, 1).reshape((-1, 100 * 87))
+    uum = np.reshape(uum, (-1, 200, 87)).transpose(0, 2, 1).reshape((-1, 200 * 87))
+    uum=(uum,uum_1d)
+    uum_test = np.reshape(uum_test, (-1, 200, 87)).transpose(0, 2, 1).reshape((-1, 200 * 87))
+    uum_test=(uum_test,uum_1d_test)
     trunk_out = trunk_out.transpose(0, 2, 1)
     trunk_out_test = trunk_out_test.transpose(0, 2, 1)
     trunk_out_input = (trunk_out.reshape((-1, 87 ,87 ,4800)), coodinates, motai, dcPs_s, dkxs_s)
@@ -41,30 +46,33 @@ def main():
     problem = "flow"
     N_points = 87 * 24
     data = dde.data.Sixthple(trunk_out_input, uum, trunk_out_input_test, uum_test)
+    # 获取 batch 数据和 indices
+    batch_train_x, batch_train_y, batch_indices = data.train_next_batch(config.batch_size)
     m = 100 * 87 * 87 * 24 * 2
     activation = ["relu", "relu", "relu"]
     initializer = config.initializer
 
     branch_net, trunk_net_1, trunk_net_2, dot = network(problem, m, N_points)
 
-    net = DeepONet_resolvent_3d(
+    net = DeepONet_resolvent_3d_mix(
         branch_net,
         trunk_net_1,
         trunk_net_2,
         dot,
+        batch_indices,
         {"branch1": activation[0], "branch2": activation[1], "trunk": activation[2]},
         kernel_initializer=initializer,
         regularization=None,
         
     )
 
-    scaler = StandardScaler().fit(uum)
-    std = np.sqrt(scaler.var_.astype(np.float32))
+    # scaler = StandardScaler().fit(uum)
+    # std = np.sqrt(scaler.var_.astype(np.float32))
 
-    def output_transform(outputs):
-        return outputs * std + scaler.mean_.astype(np.float32)
+    # def output_transform(outputs):
+    #     return outputs * std + scaler.mean_.astype(np.float32)
 
-    net.apply_output_transform(output_transform)
+    # net.apply_output_transform(output_transform)
 
     model = dde.Model(data, net)
     model.compile(
