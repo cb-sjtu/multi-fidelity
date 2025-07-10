@@ -17,11 +17,16 @@ def get_data():
     trunk_out_test = np.load('data_gen/data_motai_3d_mix.npy')[[2, 7]].reshape((2, 200, -1))
     trunk_out_v=np.load('data_gen/data_motai_3d_mix_v.npy')[[0, 1, 3, 4, 5, 6, 8, 9]].reshape((8, 200, -1))
     trunk_out_v_test=np.load('data_gen/data_motai_3d_mix_v.npy')[[2, 7]].reshape((2, 200, -1))
-    motai = (trunk_out.transpose(0, 2, 1), trunk_out_v.transpose(0, 2, 1))
-    motai_test = (trunk_out_test.transpose(0, 2, 1), trunk_out_v_test.transpose(0, 2, 1))
-    branch_in = np.concatenate((trunk_out.real[..., np.newaxis], trunk_out.imag[..., np.newaxis]), axis=-1).astype(np.float32).reshape((8, 200, -1))
-    branch_in_test = np.concatenate((trunk_out_test.real[..., np.newaxis], trunk_out_test.imag[..., np.newaxis]), axis=-1).astype(np.float32).reshape((2, 200, -1))
-    
+
+    #把两个数据集在一个新的axi上合并
+    motai = np.stack((trunk_out, trunk_out_v), axis=-1)
+    motai_test = np.stack((trunk_out_test, trunk_out_v_test), axis=-1)
+
+    motai =motai.transpose(0, 2, 1,3)
+    motai_test =motai_test.transpose(0, 2, 1,3)
+
+    branch_in = np.real(trunk_out).reshape((8, 200, -1))
+    branch_in_test = np.real(trunk_out_test).reshape((2, 200, -1))
     for i in range(8):
         scaler_Euuc = StandardScaler().fit(branch_in[i])
         std_Euuc = np.sqrt(scaler_Euuc.var_.astype(np.float32))
