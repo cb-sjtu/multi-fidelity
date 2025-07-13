@@ -1,7 +1,11 @@
-import numpy as np
+import sys
+sys.path.insert(0, '/home/sh/CB/turbulence/turbulence_spain/0611_2025/multi-fidelity/third_party')
 import deepxde as dde
+print(dde.__file__)
+import numpy as np
+
 from sklearn.preprocessing import StandardScaler
-from deepxde.nn.tensorflow_compat_v1.mionet import DeepONet_resolvent_3d_mix
+from dde.nn.tensorflow_compat_v1.resolvent_deeponet import DeepONet_resolvent_3d_mix
 from getdata import get_data
 from network import network
 from postprocess import save_results
