@@ -97,5 +97,5 @@ def get_data():
     uum_new_test = (uum_new_test, uum_1d_new_test)
 
     return uum_new, uum_new_test, trunk_out_input, trunk_out_input_test, \
-        dcPs_s, dcPs_s_test, dkxs_s, dkxs_s_test, kzs_s, kzs_s_test, \
-        y, y_test, real_2d, coodinates_zz, coodinates_zz_test
+       dkxs_s, dkxs_s_test, kzs_s, kzs_s_test, \
+        y, y_test, real_2d

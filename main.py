@@ -21,9 +21,8 @@ def main():
 
     dataframe = "DeepONet_resolvent_3d"
     uum, uum_test, trunk_out_input, trunk_out_input_test, \
-    dcPs_s, dcPs_s_test, dkxs_s, dkxs_s_test, \
-    kzs_s, kzs_s_test, yy, yy_test, real_2d, \
-    coodinates_zz, coodinates_zz_test = get_data()
+    dkxs_s, dkxs_s_test, \
+    kzs_s, kzs_s_test, yy, yy_test, real_2d= get_data()
 
     problem = "flow"
     N_points = 87 * 24
