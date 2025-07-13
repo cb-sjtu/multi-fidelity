@@ -192,7 +192,7 @@ class Sixthple(Data):
             batch_train_x_low.append(low_precision)
 
         # 最终打包
-        batch_train_x = (batch_train_x_high, batch_train_x_low)
+        batch_train_x = batch_train_x_high + batch_train_x_low
 
 
         # 处理 train_y（假设 train_y 也分为两部分）
@@ -210,7 +210,38 @@ class Sixthple(Data):
         return batch_train_x, batch_train_y
 
     def test(self):
-        return self.test_x, self.test_y
+        # 假定 self.test_x 是和 self.train_x 一样的数据结构
+        # 一般为：list，每个元素要么是 tuple/list（高低精度），要么是单一 np.ndarray
+        batch_test_x_high = []
+        batch_test_x_low = []
+
+        # 不需要 indices，直接取所有样本
+        for data in self.test_x:
+            if isinstance(data, (tuple, list)):
+                # 两部分都取全部
+                high_precision = data[0]
+                low_precision = data[1]
+            else:
+                # 假设是一个高，一个低的数据
+                high_precision = data[0:1]
+                low_precision = data[1:2]
+
+            batch_test_x_high.append(high_precision)
+            batch_test_x_low.append(low_precision)
+
+        # 展平成一个平铺 list，和 train 完全一致
+        test_x = batch_test_x_high + batch_test_x_low
+
+        # 如果 label 结构同理，也分两路（高/低精度），展平
+        if isinstance(self.test_y, (tuple, list)):
+            high_precision_y = self.test_y[0]
+            low_precision_y = self.test_y[1]
+            test_y = (high_precision_y, low_precision_y)
+        else:
+            test_y = [self.test_y]
+
+        return test_x, test_y
+
     
 
 
