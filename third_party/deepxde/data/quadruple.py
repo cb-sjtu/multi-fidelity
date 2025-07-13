@@ -172,23 +172,28 @@ class Sixthple(Data):
         half_samples = total_samples // 2
 
         # 初始化 batch_train_x 列表
-        batch_train_x = []
+        batch_train_x_high = []
+        batch_train_x_low = []
 
-        # 遍历 train_x 的每个量
         for data in self.train_x:
-            if isinstance(data, tuple) or isinstance(data, list):
-                # 如果数据分为两部分（高精度和低精度）
-                high_precision_indices = indices[indices < half_samples]
-                low_precision_indices = indices[indices >= half_samples] - half_samples
+            high_precision_indices = indices[indices < half_samples]
+            low_precision_indices = indices[indices >= half_samples] - half_samples
 
+            if isinstance(data, tuple) or isinstance(data, list):
+                # 分为两部分（高低精度各自采样）
                 high_precision = data[0][high_precision_indices]
                 low_precision = data[1][low_precision_indices]
-
-                # 合并高精度和低精度部分
-                batch_train_x.append((high_precision, low_precision))
             else:
-                # 如果数据是单一部分
-                batch_train_x.append(data[indices])
+                # 单一部分，但也分为两组
+                high_precision = data[high_precision_indices]
+                low_precision = data[low_precision_indices]
+
+            batch_train_x_high.append(high_precision)
+            batch_train_x_low.append(low_precision)
+
+        # 最终打包
+        batch_train_x = (batch_train_x_high, batch_train_x_low)
+
 
         # 处理 train_y（假设 train_y 也分为两部分）
         if isinstance(self.train_y, tuple) or isinstance(self.train_y, list):
@@ -202,7 +207,7 @@ class Sixthple(Data):
         else:
             batch_train_y = self.train_y[indices]
 
-        return batch_train_x, batch_train_y,indices
+        return batch_train_x, batch_train_y
 
     def test(self):
         return self.test_x, self.test_y
