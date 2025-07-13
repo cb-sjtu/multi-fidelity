@@ -43,8 +43,7 @@ def main():
         {"branch1": activation[0], "branch2": activation[1], "trunk": activation[2]},
         kernel_initializer=initializer,
         regularization=None,
-        data=data,
-    
+ 
     )
 
     # scaler = StandardScaler().fit(uum)
