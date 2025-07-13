@@ -226,8 +226,8 @@ class DeepONet_resolvent_3d_mix(NN):
         self.dcPs_s_l = tf.placeholder(config.real(tf), [None,23])
         self.dkxs_s_h = tf.placeholder(config.real(tf), [None,86])
         self.dkxs_s_l = tf.placeholder(config.real(tf), [None,86])
-        self._inputs =([self.X_func_h, self.X_loc_h,self.trunk_out_h,self.dcPs_s_h,self.dkxs_s_h],
-                       [self.X_func_l, self.X_loc_l,self.trunk_out_l,self.dcPs_s_l,self.dkxs_s_l])
+        self._inputs =[self.X_func_h, self.X_loc_h,self.trunk_out_h,self.dcPs_s_h,self.dkxs_s_h,
+                       self.X_func_l, self.X_loc_l,self.trunk_out_l,self.dcPs_s_l,self.dkxs_s_l]
     
         x_2_high, x_3_high = self._forward_integral(
             self.X_func_h, self.X_loc_h, self.trunk_out_h, self.dcPs_s_h, self.dkxs_s_h
