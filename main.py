@@ -12,6 +12,8 @@ import os
 # 尝试从系统继承代理设置
 
 import wandb  # 导入wandb库
+wandb.init(mode="disabled")
+# 如果需要使用代理，可以在这里设置
 from wandb_callback import WandbCallback  # 导入 WandbCallback
 
 def main():
