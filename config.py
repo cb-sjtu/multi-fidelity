@@ -3,8 +3,8 @@
 CONFIG = {
     "learning_rate": 0.0001,
     "epochs": 10000,
-    "batch_size": 3,
-    "loss": "mse",
+    "batch_size": 4,
+    "loss": "custom_mixed_loss",
     "decay_method": "inverse time",
     "decay_step": 10,
     "decay_rate": 0.1,
