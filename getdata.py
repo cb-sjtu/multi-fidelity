@@ -21,24 +21,59 @@ def get_data():
     trunk_out_v = np.load('data_gen/data_motai_3d_mix_v.npy')[[0, 1, 3, 4, 5, 6, 8, 9]].reshape((8, 200, -1))
     trunk_out_v_test = np.load('data_gen/data_motai_3d_mix_v.npy')[[2, 7]].reshape((2, 200, -1))
 
+    # 对 trunk_out 和 trunk_out_v 的实部和虚部分别进行标准化
+    for arr in [trunk_out, trunk_out_v]:
+        for i in range(arr.shape[0]):
+            # 1. 实部标准化
+            data_real = arr[i].real
+            scaler_real = StandardScaler()
+            scaler_real.fit(data_real)
+            std_real = np.sqrt(scaler_real.var_.astype(np.float32))
+            data_real -= scaler_real.mean_.astype(np.float32)
+            data_real /= std_real
+            arr[i].real[:] = data_real  # in-place 写回
+            
+            # 2. 虚部标准化
+            data_imag = arr[i].imag
+            scaler_imag = StandardScaler()
+            scaler_imag.fit(data_imag)
+            std_imag = np.sqrt(scaler_imag.var_.astype(np.float32))
+            data_imag -= scaler_imag.mean_.astype(np.float32)
+            data_imag /= std_imag
+            arr[i].imag[:] = data_imag  # in-place 写回
+
+    # 对 trunk_out_test 和 trunk_out_v_test 的实部和虚部分别进行标准化
+    for arr in [trunk_out_test, trunk_out_v_test]:
+        for i in range(arr.shape[0]):
+            # 1. 实部标准化
+            data_real = arr[i].real
+            scaler_real = StandardScaler()
+            scaler_real.fit(data_real)
+            std_real = np.sqrt(scaler_real.var_.astype(np.float32))
+            data_real -= scaler_real.mean_.astype(np.float32)
+            data_real /= std_real
+            arr[i].real[:] = data_real
+
+            # 2. 虚部标准化
+            data_imag = arr[i].imag
+            scaler_imag = StandardScaler()
+            scaler_imag.fit(data_imag)
+            std_imag = np.sqrt(scaler_imag.var_.astype(np.float32))
+            data_imag -= scaler_imag.mean_.astype(np.float32)
+            data_imag /= std_imag
+            arr[i].imag[:] = data_imag
+
+
     # 把两个数据集在一个新的 axis 上合并
     motai = np.stack((trunk_out, trunk_out_v), axis=-1)
     motai_test = np.stack((trunk_out_test, trunk_out_v_test), axis=-1)
 
-    motai = motai.transpose(0, 2, 1, 3)
-    motai_test = motai_test.transpose(0, 2, 1, 3)
+    motai = motai.transpose(0, 2, 1, 3)# 8，-1，200， 2
+    motai_test = motai_test.transpose(0, 2, 1, 3)# 2，-1，200， 2
 
-    branch_in = np.real(trunk_out).reshape((8, 200, -1))
-    branch_in_test = np.real(trunk_out_test).reshape((2, 200, -1))
-    for i in range(8):
-        scaler_Euuc = StandardScaler().fit(branch_in[i])
-        std_Euuc = np.sqrt(scaler_Euuc.var_.astype(np.float32))
-        branch_in[i] = (branch_in[i] - scaler_Euuc.mean_.astype(np.float32)) / std_Euuc
+    branch_in = np.real(trunk_out)
+    branch_in_test = np.real(trunk_out_test)
 
-    for i in range(2):
-        scaler_Euuc_test = StandardScaler().fit(branch_in_test[i])
-        std_Euuc_test = np.sqrt(scaler_Euuc_test.var_.astype(np.float32))
-        branch_in_test[i] = (branch_in_test[i] - scaler_Euuc_test.mean_.astype(np.float32)) / std_Euuc_test
 
     kzs_s = kzs[[0, 1, 3, 4]].reshape((-1, 87, 1))
     kzs_s_test = kzs[[2]].reshape((-1, 87, 1))
@@ -88,8 +123,8 @@ def get_data():
     coodinates_zz_test = coodinates[[2, 7]]
 
     # 重新组织数据
-    trunk_out_input = (trunk_out.transpose(0, 2, 1).reshape((-1, 87, 87, 4800)), coodinates_zz, motai, dcPs_s, dkxs_s)
-    trunk_out_input_test = (trunk_out_test.transpose(0, 2, 1).reshape((-1, 87, 87, 4800)), coodinates_zz_test, motai_test, dcPs_s_test, dkxs_s_test)
+    trunk_out_input = (branch_in.transpose(0, 2, 1).reshape((-1, 87, 87, 4800)), coodinates_zz, motai, dcPs_s, dkxs_s)
+    trunk_out_input_test = (branch_in_test.transpose(0, 2, 1).reshape((-1, 87, 87, 4800)), coodinates_zz_test, motai_test, dcPs_s_test, dkxs_s_test)
 
     uum_new = np.reshape(uum_new, (-1, 200, 87)).transpose(0, 2, 1).reshape((-1, 200 * 87))
     uum_new_test = np.reshape(uum_new_test, (-1, 200, 87)).transpose(0, 2, 1).reshape((-1, 200 * 87))
